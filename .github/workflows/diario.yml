@@ -1,0 +1,25 @@
+name: actualizar
+on:
+  schedule:
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install anthropic
+      - run: python actualizar.py
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - run: |
+          git config user.name "tiempo-extra-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add docs/data.json
+          git commit -m "datos del día" || echo "sin cambios"
+          git push
